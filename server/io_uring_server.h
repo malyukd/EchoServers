@@ -1,24 +1,34 @@
 #include "Server.h"
 #include <liburing.h>
 
-struct Operation {
-        enum class Type { ACCEPT, READ, WRITE, TIMEOUT };
+struct Operation
+{
+        enum class Type
+        {
+                ACCEPT,
+                READ,
+                WRITE
+        };
         Type type;
         int fd;
-        static constexpr size_t BUFFER_SIZE = 100;
+        size_t size;
+        const static int BUFFER_SIZE = 100;
         char buff[BUFFER_SIZE];
-        size_t data_size; 
 };
 
-class IO_uring_server: public Server{
-    int connector;
-    io_uring_params params = {0};
-    io_uring ring;
-    io_uring_cqe* cqes[50];
+class IO_uring_server : public Server
+{
+        int connector;
+        io_uring_params params = {0};
+        io_uring ring;
+        io_uring_cqe *cqes[50];
 
-    public:
-        IO_uring_server(char ip[50], int port){ connector = create_connector(ip, port);}
+public:
+        IO_uring_server(char ip[50], int port) { connector = create_connector(ip, port); }
         int init_server() override;
         int loop_server() override;
-        ~IO_uring_server(){close(connector);};
+        int prep_read(int fd);
+        int prep_write(int fd, char *buff, ssize_t buff_size);
+        int prep_accept();
+        ~IO_uring_server() { close(connector); };
 };
