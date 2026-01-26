@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(server
     server_.cpp
-    io_uring_server.h
-    io_uring_server.cpp
+    epoll_server.h
+    epoll_server.cpp
     Server.h
     MetricsCollector.h
     MetricsCollector.cpp
