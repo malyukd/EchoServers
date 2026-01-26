@@ -107,7 +107,6 @@ int IO_uring_server::loop_server()
                     {
                         printf("new message\n");
                         prep_write(op->fd, op->buff, op->size);
-                        
                     }
                     // else{
                     //     delete op;
