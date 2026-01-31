@@ -1,4 +1,6 @@
-#include "Server.h"
+#pragma once
+
+#include "server.h"
 #include <liburing.h>
 
 struct Operation

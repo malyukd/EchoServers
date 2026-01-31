@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstring>
-#include "epoll_server.h"
-#include "io_uring_server.h"
+#include "epoll_server_controller.h"
+#include "io_uring_server_controller.h"
 #include <thread>
 #include <iostream>
 #include "MetricsCollector.h"
@@ -35,9 +35,10 @@ void console_input()
 int main(int argc, char **argv)
 {
     char ip[50] = "0.0.0.0";
-    Epoll_server server = Epoll_server(ip, 8888);
-    server.init_server();
+    Epoll_server_controller epoll_server_controller;
+    Server *server = epoll_server_controller.create_server(ip, 8888);
+    server->init_server();
     printf("loop starting\n");
-    server.loop_server();
+    server->loop_server();
     exit(0);
 }

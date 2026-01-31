@@ -1,4 +1,6 @@
-#include "Server.h"
+#pragma once
+
+#include "server.h"
 #include <sys/epoll.h>
 
 class Epoll_server : public Server

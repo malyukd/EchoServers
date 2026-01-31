@@ -10,6 +10,9 @@ add_executable(server
     epoll_server.h
     epoll_server.cpp
     Server.h
+    server_controller.h
+    io_uring_server_controller.h
+    epoll_server_controller.h
     MetricsCollector.h
     MetricsCollector.cpp
 )

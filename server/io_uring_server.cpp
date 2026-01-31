@@ -108,11 +108,6 @@ int IO_uring_server::loop_server()
                         printf("new message\n");
                         prep_write(op->fd, op->buff, op->size);
                     }
-                    // else{
-                    //     delete op;
-                    //     close(fd);
-                    //     printf("connection closed\n");
-                    // }
                     delete op;
                 }
                 else if (op->type == Operation::Type::WRITE)
@@ -120,17 +115,13 @@ int IO_uring_server::loop_server()
                     printf("sent: %s\n", op->buff);
                     prep_read(op->fd);
                 }
-                // else{
-                //     close(fd);
-                //     delete op;
-                //     printf("connection closed\n");
-                // }
             }
-            // else{
-            //     close(fd);
-            //     delete op;
-            //     printf("connection closed\n");
-            // }
+            else
+            {
+                close(fd);
+                delete op;
+                printf("connection closed\n");
+            }
 
             io_uring_cqe_seen(&ring, cqe);
         }
