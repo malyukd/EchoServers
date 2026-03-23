@@ -35,8 +35,8 @@ void console_input()
 int main(int argc, char **argv)
 {
     char ip[50] = "0.0.0.0";
-    Epoll_server_controller epoll_server_controller;
-    Server *server = epoll_server_controller.create_server(ip, 8888);
+    IO_uring_server_controller io_uring_server_controller;
+    Server *server = io_uring_server_controller.create_server(ip, 8888);
     server->init_server();
     printf("loop starting\n");
     server->loop_server();

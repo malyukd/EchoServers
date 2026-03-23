@@ -7,9 +7,12 @@
 #include <netinet/in.h>
 #include <cstring>
 #include <stdio.h>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 class Server{
     public:
+        virtual ~Server() = default;
         int create_connector(char ip[50], int port){
             in_addr local_ip;
             if (inet_pton(AF_INET, ip, &local_ip)<0) {
@@ -41,8 +44,9 @@ class Server{
             printf("listening\n");
             return connector;  //не забыть закрыть коннектор
         }
+
         virtual int init_server() = 0;
         virtual int loop_server() = 0;
-        
+        virtual int check_protocol(char *buff, ssize_t buf_size) = 0;
 
 };

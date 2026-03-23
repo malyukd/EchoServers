@@ -1,43 +1,33 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
+#include "client.h"
 #include <iostream>
-#include <unistd.h>     // read, write, close
-#include <arpa/inet.h>  // sockaddr_in, inet_pton
-#include <sys/socket.h> // socket, connect
-#include <cstring>      // strlen
 
-using namespace std;
-
-int main(int argc, char **argv)
+int Client::check_protocol(char *buff, ssize_t buf_size)
 {
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
+    try
     {
-        perror("socket");
-        exit(EXIT_FAILURE);
+        json j = json::parse(buff);
+        if (!strcmp(j["protocol"].get<std::string>().c_str(), "io_uring"))
+        {
+            memset(buff, 0, buf_size);
+            strncpy(buff, j["message"].get<std::string>().c_str(), buf_size-1);
+            buff[buf_size - 1] = '\0';
+            return 1;
+        }
+        else
+        {
+            return -1;
+        }
     }
-
-    sockaddr_in server_addr = {0};
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(8888); // Порт сервера
-
-    if (inet_pton(AF_INET, "0.0.0.0", &server_addr.sin_addr) <= 0)
+    catch (std::exception& e)
     {
-        perror("inet_pton");
-        close(sockfd);
-        exit(EXIT_FAILURE);
+        return -1;
     }
+}
 
-    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
-    {
-        perror("connect");
-        close(sockfd);
-        exit(EXIT_FAILURE);
-    }
 
-    printf("Connected to server\n");
-
+int Client::loop_client()
+{
+    printf("loop started\n");
     string message;
     char buffer[1024];
     ssize_t len;
@@ -46,6 +36,10 @@ int main(int argc, char **argv)
     {
         cout << "Enter message (or 'exit' to quit): ";
         getline(cin, message);
+        json j;
+        j["protocol"]= this->protocol;        
+        j["message"] = message;
+        message = j.dump(4);
 
         if (message == "exit")
         {
@@ -63,7 +57,13 @@ int main(int argc, char **argv)
         if (len > 0)
         {
             buffer[len] = 0;
-            printf("Received: %s\n", buffer);
+            if(check_protocol(buffer, len)==1){
+                printf("Received: %s\n", buffer);
+            }else{
+                printf("incorrect protocol\n");
+                break;
+            }
+            
         }
         else if (len == 0)
         {
@@ -79,5 +79,5 @@ int main(int argc, char **argv)
 
     close(sockfd);
     printf("Connection closed\n");
-    return 0;
+    return 1;
 }

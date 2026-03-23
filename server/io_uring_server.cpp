@@ -1,6 +1,29 @@
 #include "io_uring_server.h"
 #include <iostream>
 
+int IO_uring_server::check_protocol(char *buff, ssize_t buf_size)
+{
+    try
+    {
+        json j = json::parse(buff);
+        if (!strcmp(j["protocol"].get<std::string>().c_str(), "io_uring"))
+        {
+            memset(buff, 0, buf_size);
+            strncpy(buff, j["message"].get<std::string>().c_str(), buf_size - 1);
+            buff[buf_size - 1] = '\0';
+            return 1;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    catch (std::exception& e)
+    {
+        return -1;
+    }
+}
+
 int IO_uring_server::init_server()
 {
     int ret = io_uring_queue_init_params(4, &ring, &params);
@@ -8,7 +31,6 @@ int IO_uring_server::init_server()
     io_uring_prep_accept(sqe, connector,
                          NULL,
                          NULL, 0);
-    // sqe->rw_flags = SOCK_NONBLOCK;
     Operation *op = new Operation();
     op->type = Operation::Type::ACCEPT;
     op->fd = connector;
@@ -106,7 +128,14 @@ int IO_uring_server::loop_server()
                     if (op->size > 0)
                     {
                         printf("new message\n");
-                        prep_write(op->fd, op->buff, op->size);
+                        if(check_protocol(op->buff, op->size)==1){
+                            prep_write(op->fd, op->buff, op->size);
+                        }else{
+                            close(op->fd);
+                            delete op;
+                            printf("connection closed\n");
+                            continue;
+                        }
                     }
                     delete op;
                 }
@@ -118,7 +147,7 @@ int IO_uring_server::loop_server()
             }
             else
             {
-                close(fd);
+                close(op->fd);
                 delete op;
                 printf("connection closed\n");
             }

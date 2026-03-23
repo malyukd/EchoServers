@@ -29,6 +29,7 @@ public:
         IO_uring_server(char ip[50], int port) { connector = create_connector(ip, port); }
         int init_server() override;
         int loop_server() override;
+        int check_protocol(char *buff, ssize_t buf_size) override;
         int prep_read(int fd);
         int prep_write(int fd, char *buff, ssize_t buff_size);
         int prep_accept();

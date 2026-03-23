@@ -9,6 +9,8 @@ add_executable(server
     server_.cpp
     epoll_server.h
     epoll_server.cpp
+    io_uring_server.h
+    io_uring_server.cpp
     Server.h
     server_controller.h
     io_uring_server_controller.h
@@ -17,5 +19,6 @@ add_executable(server
     MetricsCollector.cpp
 )
 
+target_link_libraries(server nlohmann_json::nlohmann_json)
 target_link_libraries(server uring)
 
