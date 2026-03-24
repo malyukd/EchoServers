@@ -40,6 +40,7 @@ int Client::loop_client()
         j["protocol"]= this->protocol;        
         j["message"] = message;
         message = j.dump(4);
+        message += '\n';
 
         if (message == "exit")
         {
@@ -57,6 +58,7 @@ int Client::loop_client()
         if (len > 0)
         {
             buffer[len] = 0;
+            printf("Received0: %s\n", buffer);
             if(check_protocol(buffer, len)==1){
                 printf("Received: %s\n", buffer);
             }else{

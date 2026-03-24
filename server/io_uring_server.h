@@ -33,5 +33,6 @@ public:
         int prep_read(int fd);
         int prep_write(int fd, char *buff, ssize_t buff_size);
         int prep_accept();
+        ssize_t add_protocol(char *buff, ssize_t buf_size);
         ~IO_uring_server() { close(connector); };
 };

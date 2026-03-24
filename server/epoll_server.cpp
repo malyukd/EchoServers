@@ -24,6 +24,13 @@ int Epoll_server::check_protocol(char *buff, ssize_t buf_size)
     }
 }
 
+// int Epoll_server::add_protocol(char *buff, ssize_t buf_size){
+//     json j;
+//     j["protocol"]= "epoll";        
+//     strncpy(j["message"].c_str(), buff, buf_size-1);
+//     strncpy(buff, j.dump(4).c_str(), buf_size-1);
+// }
+
 int Epoll_server::init_server()
 {
     epoll_base = epoll_create1(0);

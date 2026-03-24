@@ -24,6 +24,20 @@ int IO_uring_server::check_protocol(char *buff, ssize_t buf_size)
     }
 }
 
+ssize_t IO_uring_server::add_protocol(char *buff, ssize_t buf_size){
+    json j;
+    j["protocol"]= "io_uring";        
+    j["message"] = buff;
+    std::string json_str = j.dump(4);
+    json_str += '\n';
+    if (json_str.size() >= static_cast<size_t>(buf_size)) {
+        return -1; 
+    }
+    memcpy(buff, json_str.c_str(), json_str.size());
+    buff[json_str.size()] = '\0';
+    return static_cast<ssize_t>(json_str.size());
+}
+
 int IO_uring_server::init_server()
 {
     int ret = io_uring_queue_init_params(4, &ring, &params);
@@ -60,6 +74,8 @@ int IO_uring_server::prep_write(int fd, char *buff, ssize_t buff_size)
     write_op->size = 0;
     buff[buff_size] = 0;
     printf("recived: %s\n", buff);
+    buff_size = add_protocol(buff, buff_size);
+    printf("sent: %s\n", buff);
     io_uring_sqe *sqe = io_uring_get_sqe(&ring);
     write_op->type = Operation::Type::WRITE;
     write_op->fd = fd;
@@ -126,14 +142,14 @@ int IO_uring_server::loop_server()
                     op->size = cqe->res;
                     printf("new message\n");
                     if (op->size > 0)
-                    {
-                        printf("new message\n");
+                    {   
+                        printf("recive: %s\n", op->buff);
                         if(check_protocol(op->buff, op->size)==1){
                             prep_write(op->fd, op->buff, op->size);
                         }else{
                             close(op->fd);
                             delete op;
-                            printf("connection closed\n");
+                            printf("incorrect protocol\n");
                             continue;
                         }
                     }
